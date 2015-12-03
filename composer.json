@@ -1,0 +1,14 @@
+{
+    "name": "iddqdby/last-news",
+    "description": "Parser of articles from various sources",
+    "authors": [
+        {
+            "name": "Sergey Protasevich",
+            "email": "sergey.p@gmx.com"
+        }
+    ],
+    "require": {
+        "querypath/querypath": "3.0.4",
+        "guzzlehttp/guzzle": "5.3.0"
+    }
+}
