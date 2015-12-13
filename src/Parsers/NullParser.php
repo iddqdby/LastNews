@@ -1,6 +1,6 @@
 <?php
 
-namespace LastNews\Parsers;
+namespace IDDQDBY\LastNews\Parsers;
 
 /**
  * Stub for unimplemented/invalid resource names.

@@ -1,6 +1,6 @@
 <?php
 
-namespace LastNews\Parsers;
+namespace IDDQDBY\LastNews\Parsers;
 
 use Exception;
 use GuzzleHttp\Client;
@@ -31,7 +31,7 @@ abstract class AbstractHtmlParser implements IParser {
             $full_uri = $this->constructFullURI( $base_uri, $section, $section_uri );
 
             if( 0 >= $amount ) {
-                $amount = $this->getDefaultAmout( $section );
+                $amount = $this->getMaxAmout( $section );
             }
 
             $http_options = $this
@@ -44,32 +44,46 @@ abstract class AbstractHtmlParser implements IParser {
                     ->getBody()
                     ->getContents();
         
-            $articles = [
-                $this->getResourceTitle( $section ),
-            ];
-
-            for( $i = 0; $i < $amount; $i++ ) {
-
-                try {
-                    $article_info = $this
-                            ->parseArticleInfo( $base_uri, $section, $section_uri, $amount, $section_html, $i );
-                    $article = $this
-                            ->parseArticle( $http_client, $base_uri, $section, $section_uri, $article_info );
-                } catch( Exception $ex ) {
-                    $article = $this->createErrorText( $ex );
+            $article_number = 0;
+            $article_info_array = [];
+            $article_array = [];
+            $errors_array = [];
+            
+            try {
+                while( null !== ( $article_info = $this->parseArticleInfo(
+                        $base_uri,
+                        $section,
+                        $section_uri,
+                        $amount,
+                        $section_html,
+                        $article_number
+                ) ) && ( 0 === $amount || $article_number < $amount ) ) {
+                    $article_info_array[ $article_number++ ] = $article_info;
                 }
-                
-                $articles[] = $article;
+            } catch( Exception $ex ) {
+                $errors_array[ $article_number ] = $ex;
             }
 
-            $articles_separator = $this->getArticlesSeparator();
-
-            $text_final = implode( $articles_separator, $articles );
-            return $text_final;
+            foreach( $article_info_array as $article_number => $article_info ) {
+                try {
+                    $article_array[ $article_number ] = $this->parseArticle(
+                        $http_client,
+                        $base_uri,
+                        $section,
+                        $section_uri,
+                        $article_info
+                    );
+                } catch( Exception $ex ) {
+                    $errors_array[ $article_number ] = $ex;
+                }
+            }
+            
+            $resource_title = $this->getResourceTitle( $section );
+            
+            return new ParserResult( $resource_title, $article_array, $errors_array );
             
         } catch( Exception $ex ) {
-            $text_error = $this->createErrorText( $ex );
-            return $text_error;
+            return new ParserResult( '', [], [ $ex ] );
         }
     }
 
@@ -155,29 +169,6 @@ abstract class AbstractHtmlParser implements IParser {
     }
     
     /**
-     * Create text for error.
-     * 
-     * Override this method to create custom text.
-     * 
-     * @param Exception $ex the exception
-     * @return string the text for HTTP error
-     */
-    protected function createErrorText( Exception $ex ) {
-        return "ERROR:\nFail to get data.\nException:\n".$ex;
-    }
-    
-    /**
-     * Get separator string for the articles in the final text.
-     * 
-     * Override this method to use custom one.
-     * 
-     * @return string separator string for the articles
-     */
-    protected function getArticlesSeparator() {
-        return "\n\n================\n\n";
-    }
-    
-    /**
      * Check if given section exists.
      * 
      * @param string $section the name of the section
@@ -201,12 +192,12 @@ abstract class AbstractHtmlParser implements IParser {
     protected abstract function getSectionURI( $section );
     
     /**
-     * Get default amount of articles to parse.
+     * Get max amount of last articles to parse.
      * 
      * @param string $section the name of the section
-     * @return int default amount of articles to parse
+     * @return int max amount of articles to parse
      */
-    protected abstract function getDefaultAmout( $section );
+    protected abstract function getMaxAmout( $section );
     
     /**
      * Get the title of the resource.

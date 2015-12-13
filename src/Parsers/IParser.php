@@ -1,6 +1,6 @@
 <?php
 
-namespace LastNews\Parsers;
+namespace IDDQDBY\LastNews\Parsers;
 
 /**
  * Parser interface.
@@ -16,7 +16,7 @@ interface IParser {
      * 
      * @param string $section the name of the section
      * @param int $amount amount of articles to parse
-     * @return string plain text of parsed articles
+     * @return ParserResult the result containing title and array of articles
      */
     function parse( $section, $amount );
     

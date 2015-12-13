@@ -1,6 +1,6 @@
 <?php
 
-namespace LastNews\Parsers;
+namespace IDDQDBY\LastNews\Parsers;
 
 /**
  * Parser for TUT.BY.
@@ -9,24 +9,21 @@ namespace LastNews\Parsers;
  */
 class TutBYParser extends AbstractHtmlParser {
     
-    const SECTION_DEFAULT = 'www';
+    const SECTION_DEFAULT = 'm';
     const SECTION_FINANCE = 'finance';
-    const SECTION_REALTY = 'realty';
     const SECTION_AUTO = 'auto';
     const SECTION_SPORT = 'sport';
     const SECTION_42 = '42';
     const SECTION_LADY = 'lady';
     const SECTION_PLACEHOLDER = '%section%';
-    const ATTEMPTS = 10;
     
     private static $sections = [
-        self::SECTION_DEFAULT => 9,
-        self::SECTION_FINANCE => 6,
-        self::SECTION_REALTY => 3,
-        self::SECTION_AUTO => 3,
-        self::SECTION_SPORT => 3,
-        self::SECTION_42 => 3,
-        self::SECTION_LADY => 3,
+        self::SECTION_DEFAULT => 'Главные новости',
+        self::SECTION_FINANCE => 'Финансы',
+        self::SECTION_AUTO => 'Авто',
+        self::SECTION_SPORT => 'Спорт',
+        self::SECTION_42 => 'Высокие технологии',
+        self::SECTION_LADY => 'Леди',
     ];
 
     protected function sectionExists( $section ) {
@@ -46,156 +43,93 @@ class TutBYParser extends AbstractHtmlParser {
     }
     
     protected function constructFullURI( $base_uri, $section, $section_uri ) {
-        return str_replace( self::SECTION_PLACEHOLDER, $section_uri, $base_uri );
+        $uri = str_replace( self::SECTION_PLACEHOLDER, $section_uri, $base_uri );
+        if( self::SECTION_DEFAULT !== $section ) {
+            $uri .= 'pda/';
+        }
+        return $uri;
     }
 
-    protected function getDefaultAmout( $section ) {
-        return self::$sections[ $section ];
+    protected function getMaxAmout( $section ) {
+        return 0;
     }
 
     protected function getResourceTitle( $section ) {
-        
-        $title = 'Новости TUT.BY: ';
-        
-        switch( $section ) {
-            case self::SECTION_DEFAULT:
-                $title .= 'Главные новости';
-                break;
-            case self::SECTION_FINANCE:
-                $title .= 'Финансы';
-                break;
-            case self::SECTION_REALTY:
-                $title .= 'Недвижимость';
-                break;
-            case self::SECTION_AUTO:
-                $title .= 'Авто';
-                break;
-            case self::SECTION_SPORT:
-                $title .= 'Спорт';
-                break;
-            case self::SECTION_42:
-                $title .= 'Высокие технологии';
-                break;
-            case self::SECTION_AFISHA:
-                $title .= 'Афиша';
-                break;
-            case self::SECTION_LADY:
-                $title .= 'Леди';
-                break;
-        }
-        
-        return $title;
+        return 'Новости TUT.BY: '.self::$sections[ $section ];
     }
 
     protected function parseArticleInfo( $base_uri, $section, $section_uri, $amount, $section_html, $article_number ) {
         
-        if( $this->getDefaultAmout( $section ) <= $article_number ) {
+        $max_amount = $this->getMaxAmout( $section );
+        if( 0 < $max_amount && $article_number >= $max_amount ) {
             return null;
         }
         
-        $article_info = null;
+        $uri_array = [];
+        
         $section_object = htmlqp( $section_html );
         
-        switch( $section ) {
-            case self::SECTION_DEFAULT:
-                
-                switch( $article_number ) {
-                    case 0:
-                        $selector = '#title_news_block .b-general .entry-head a';
-                        $node_num = 0;
-                        break;
-                    case 1:
-                    case 2:
-                        $selector = '#title_news_block .b-topnews .b-topc-hot a.entry__link';
-                        $node_num = $article_number - 1;
-                        break;
-                    default:
-                        $selector = '#title_news_block .b-topnews .b-newsfeed .news-entry a.entry__link';
-                        $node_num = $article_number - 3;
-                }
-                
+        $dl_array = $section_object
+                ->find('div#maincontent div.news dl')
+                ->get();
+        
+        $dt_found = false;
+        foreach( $dl_array as $dl_node ) {
+            
+            $dl = htmlqp( $dl_node );
+            $dt = $dl
+                    ->find('dt')
+                    ->get( 0 );
+            
+            if( $dt && $dt_found ) {
+                // end of main section
                 break;
-            case self::SECTION_FINANCE:
-                
-                switch( $article_number ) {
-                    case 0:
-                        $selector = '.b-title-news .main_news a';
-                        $node_num = 0;
-                        break;
-                    default:
-                        $selector = '.b-title-news .additional_news li a';
-                        $node_num = $article_number - 1;
-                }
-                
-                break;
-            case self::SECTION_REALTY:
-            case self::SECTION_AUTO:
-            case self::SECTION_SPORT:
-            case self::SECTION_42:
-            case self::SECTION_LADY:
-                
-                $selector = '.b-mainnews th a';
-                $node_num = $article_number;
-                
-                break;
+            } else {
+                $dt_found = true;
+            }
+            
+            $a_array = $dl
+                    ->find('a')
+                    ->get();
+            
+            foreach( $a_array as $a_node ) {
+                $uri_array[] = htmlqp( $a_node )->attr('href');
+            }
         }
         
-        $a = $section_object
-                ->find( $selector )
-                ->get( $node_num );
-        
-        if( $a ) {
-            $article_info = htmlqp( $a )->attr('href');
-        }
-        
-        return $article_info;
+        return array_key_exists( $article_number, $uri_array ) ? $uri_array[ $article_number ] : null;
     }
 
     protected function parseArticle( \GuzzleHttp\Client $http_client, $base_uri, $section, $section_uri, $article_info ) {
-        
-        if( empty( $article_info ) ) {
-            return '';
-        }
-        
-        $title_string = '';
-        $text_string = '';
-        
-        $attempt = self::ATTEMPTS;
-        
-        do {
-        
-            sleep( 1 );
 
-            $article_html = $http_client
-                    ->get( $article_info )
-                    ->getBody()
-                    ->getContents();
+        $article_html = $http_client
+                ->get( $article_info )
+                ->getBody()
+                ->getContents();
 
-            $article_object = htmlqp( $article_html, null, [ 'convert_to_encoding' => 'UTF-8' ] );
+        $article_object = htmlqp( $article_html, null, [ 'convert_to_encoding' => 'UTF-8' ] );
 
-            $title_selector = 'div.m_header h1';
-            $title_node_num = 0;
+        $title_selector = 'div#maincontent div.body div.h h2';
+        $title_node_num = 0;
 
-            $text_selector = '#article_body p strong';
-            $text_node_num = 0;
+        $text_selector = 'div#maincontent div.body p';
+        $text_node_num = 0;
 
-            $title = $article_object
-                    ->find( $title_selector )
-                    ->get( $title_node_num );
+        $title = $article_object
+                ->find( $title_selector )
+                ->get( $title_node_num );
 
-            $text = $article_object
-                    ->find( $text_selector )
-                    ->get( $text_node_num );
+        $text = $article_object
+                ->find( $text_selector )
+                ->get( $text_node_num );
 
-            $title_string = $title
-                    ? htmlqp( $title )->text()
-                    : '';
+        $title_string = $title
+                ? htmlqp( $title )->text()
+                : '';
 
-            $text_string = $text
-                    ? htmlqp( $text )->text()
-                    : '';
-            
-        } while( ( empty( $title_string ) || empty( $text_string ) ) && 0 < $attempt-- );
+        $text_string = $text
+                ? htmlqp( $text )->text()
+                : '';
         
         return $title_string."\n\n".$text_string;
     }
