@@ -53,17 +53,18 @@ class TutBYParser extends AbstractHtmlParser {
     protected function getMaxAmout( $section ) {
         return 0;
     }
+    
+    protected function getHTTPOptions( $base_uri, $section, $section_uri, $amount ) {
+        $options = parent::getHTTPOptions( $base_uri, $section, $section_uri, $amount );
+        $options['defaults']['headers']['Referer'] = str_replace( self::SECTION_PLACEHOLDER, self::SECTION_DEFAULT, $base_uri );
+        return $options;
+    }
 
     protected function getResourceTitle( $section ) {
         return 'Новости TUT.BY: '.self::$sections[ $section ];
     }
 
-    protected function parseArticleInfo( $base_uri, $section, $section_uri, $amount, $section_html, $article_number ) {
-        
-        $max_amount = $this->getMaxAmout( $section );
-        if( 0 < $max_amount && $article_number >= $max_amount ) {
-            return null;
-        }
+    protected function parseArticleInfo( $base_uri, $section, $section_uri, $full_uri, $amount, $section_html, $article_number ) {
         
         $uri_array = [];
         
@@ -100,8 +101,12 @@ class TutBYParser extends AbstractHtmlParser {
         return array_key_exists( $article_number, $uri_array ) ? $uri_array[ $article_number ] : null;
     }
 
-    protected function parseArticle( \GuzzleHttp\Client $http_client, $base_uri, $section, $section_uri, $article_info ) {
+    protected function parseArticle( \GuzzleHttp\Client $http_client, $base_uri, $section, $section_uri, $full_uri, $article_info ) {
 
+        if( !preg_match( '/^https?:\/\//', $article_info ) ) {
+            $article_info = str_replace( '/pda/', $full_uri, $article_info );
+        }
+        
         $article_html = $http_client
                 ->get( $article_info )
                 ->getBody()
@@ -131,7 +136,7 @@ class TutBYParser extends AbstractHtmlParser {
                 ? htmlqp( $text )->text()
                 : '';
         
-        return $title_string."\n\n".$text_string;
+        return trim( $title_string )."\n\n".trim( $text_string );
     }
 
 }

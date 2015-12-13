@@ -54,6 +54,7 @@ abstract class AbstractHtmlParser implements IParser {
                         $base_uri,
                         $section,
                         $section_uri,
+                        $full_uri,
                         $amount,
                         $section_html,
                         $article_number
@@ -71,6 +72,7 @@ abstract class AbstractHtmlParser implements IParser {
                         $base_uri,
                         $section,
                         $section_uri,
+                        $full_uri,
                         $article_info
                     );
                 } catch( Exception $ex ) {
@@ -217,13 +219,14 @@ abstract class AbstractHtmlParser implements IParser {
      * @param string $base_uri base URI of the resource
      * @param string $section the name of the section
      * @param string $section_uri relative URI of the section
+     * @param string $full_uri full URI of the section
      * @param int $amount amount of articles to parse
      * @param string $section_html HTML of the section page
      * @param int $article_number number of the article
      * @return mixed information about given article
      */
     protected abstract function parseArticleInfo(
-            $base_uri, $section, $section_uri, $amount, $section_html, $article_number );
+            $base_uri, $section, $section_uri, $full_uri, $amount, $section_html, $article_number );
     
     /**
      * Parse article.
@@ -235,11 +238,12 @@ abstract class AbstractHtmlParser implements IParser {
      * @param string $base_uri base URI of the resource
      * @param string $section the name of the section
      * @param string $section_uri relative URI of the section
+     * @param string $full_uri full URI of the section
      * @param mixed $article_info information about given article returned by
      * the <code>parseArticleInfo()</code> method
      * @return string the text of the article
      */
     protected abstract function parseArticle(
-            Client $http_client, $base_uri, $section, $section_uri, $article_info );
+            Client $http_client, $base_uri, $section, $section_uri, $full_uri, $article_info );
     
 }
