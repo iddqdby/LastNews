@@ -14,7 +14,7 @@ use IDDQDBY\LastNews\Parsers\Result\Excerpt;
  *
  * @author Sergey Protasevich
  */
-abstract class AbstractHtmlParser implements IParser {
+abstract class AbstractHTMLParser implements IParser {
     
     /**
      * {@inheritdoc}
@@ -51,15 +51,19 @@ abstract class AbstractHtmlParser implements IParser {
             $errors_array = [];
             
             try {
-                while( null !== ( $article_info = $this->parseArticleInfo(
-                        $base_uri,
-                        $section,
-                        $section_uri,
-                        $full_uri,
-                        $amount,
-                        $section_html,
-                        $article_number
-                ) ) && ( 0 === $amount || $article_number < $amount ) ) {
+                while(
+                        ( 0 === $amount || $article_number < $amount )
+                        &&
+                        null !== ( $article_info = $this->parseArticleInfo(
+                                $base_uri,
+                                $section,
+                                $section_uri,
+                                $full_uri,
+                                $amount,
+                                $section_html,
+                                $article_number
+                        ) )
+                ) {
                     $article_info_array[ $article_number++ ] = $article_info;
                 }
             } catch( Exception $ex ) {

@@ -2,6 +2,7 @@
 
 namespace IDDQDBY\LastNews;
 
+use InvalidArgumentException;
 use IDDQDBY\LastNews\ParserProvider;
 
 /**
@@ -16,7 +17,7 @@ class LastNewsReader {
     private static $built_in_parser_classes = [
         self::DEFAULT_RESOURCE  => '\\IDDQDBY\\LastNews\\Parsers\\NullParser',
         'tut.by'                => '\\IDDQDBY\\LastNews\\Parsers\\TutBYParser',
-//        'nn.by'                 => '\\IDDQDBY\\LastNews\\Parsers\\NashaNivaBYParser',
+        'nn.by'                 => '\\IDDQDBY\\LastNews\\Parsers\\NashaNivaBYParser',
 //        'elementy.ru'           => '\\IDDQDBY\\LastNews\\Parsers\\ElementyRUParser',
         // TODO Add another parsers here
     ];
@@ -36,8 +37,8 @@ class LastNewsReader {
     /**
      * Read last news from the given resource.
      * 
-     * @param string $resource the name of resource
-     * @param string $section the name of section
+     * @param string $resource the name of the resource
+     * @param string $section the name of the section
      * @param int $amount maximum amount of news to read
      * @param callable $processor callback to process the result (optional);
      * instance of <code>ParserResult</code>
@@ -56,6 +57,21 @@ class LastNewsReader {
         $result = $parser->parse( $section, $amount );
         
         return is_null( $processor ) ? $result : call_user_func( $processor, $result );
+    }
+    
+    /**
+     * Get array of supported sections for given resource.
+     * 
+     * @param string $resource the name of the resource
+     * @return array supported sections
+     * @throws InvalidArgumentException if parser for given resourse is not
+     * registered
+     */
+    public function getSupportedSections( $resource ) {
+        return $this
+                ->getParserProvider()
+                ->getParser( $resource )
+                ->getSections();
     }
     
     /**

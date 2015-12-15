@@ -22,4 +22,9 @@ interface IParser {
      */
     function parse( $section, $amount );
     
+    /**
+     * Get array of supported sections.
+     */
+    function getSections();
+    
 }

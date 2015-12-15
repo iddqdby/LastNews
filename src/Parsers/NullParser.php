@@ -16,4 +16,11 @@ class NullParser implements IParser {
         return 'Resource is not implemented or name is invalid.';
     }
 
+    /**
+     * {@inheritdoc}
+     */
+    public function getSections() {
+        return [];
+    }
+
 }

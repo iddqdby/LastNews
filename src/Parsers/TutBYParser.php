@@ -11,7 +11,7 @@ use IDDQDBY\LastNews\Parsers\Result\Article;
  *
  * @author Sergey Protasevich
  */
-class TutBYParser extends AbstractHtmlParser {
+class TutBYParser extends AbstractHTMLParser {
     
     const SECTION_DEFAULT = 'm';
     const SECTION_FINANCE = 'finance';
@@ -21,7 +21,7 @@ class TutBYParser extends AbstractHtmlParser {
     const SECTION_LADY = 'lady';
     const SECTION_PLACEHOLDER = '%section%';
     
-    private static $sections = [
+    private static $sections_title = [
         self::SECTION_DEFAULT => 'Главные новости',
         self::SECTION_FINANCE => 'Финансы',
         self::SECTION_AUTO => 'Авто',
@@ -30,8 +30,22 @@ class TutBYParser extends AbstractHtmlParser {
         self::SECTION_LADY => 'Леди',
     ];
 
+    /**
+     * {@inheritdoc}
+     */
+    public function getSections() {
+        return [
+            self::SECTION_DEFAULT,
+            self::SECTION_FINANCE,
+            self::SECTION_AUTO,
+            self::SECTION_SPORT,
+            self::SECTION_42,
+            self::SECTION_LADY,
+        ];
+    }
+
     protected function sectionExists( $section ) {
-        return array_key_exists( $section, self::$sections );
+        return array_key_exists( $section, self::$sections_title );
     }
     
     protected function getDefaultSection() {
@@ -65,7 +79,7 @@ class TutBYParser extends AbstractHtmlParser {
     }
 
     protected function getResourceTitle( $section ) {
-        return 'Новости TUT.BY: '.self::$sections[ $section ];
+        return 'Новости TUT.BY: '.self::$sections_title[ $section ];
     }
 
     protected function parseArticleInfo( $base_uri, $section, $section_uri, $full_uri, $amount, $section_html, $article_number ) {
@@ -118,19 +132,13 @@ class TutBYParser extends AbstractHtmlParser {
 
         $article_object = htmlqp( $article_html, null, [ 'convert_to_encoding' => 'UTF-8' ] );
 
-        $title_selector = 'div#maincontent div.body div.h h2';
-        $title_node_num = 0;
-
-        $text_selector = 'div#maincontent div.body p';
-        $text_node_num = 0;
-
         $title = $article_object
-                ->find( $title_selector )
-                ->get( $title_node_num );
+                ->find( 'div#maincontent div.body div.h h2' )
+                ->get( 0 );
 
         $text = $article_object
-                ->find( $text_selector )
-                ->get( $text_node_num );
+                ->find( 'div#maincontent div.body p' )
+                ->get( 0 );
 
         $title_string = $title
                 ? trim( htmlqp( $title )->text() )

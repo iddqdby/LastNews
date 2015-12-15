@@ -63,17 +63,17 @@ class ParserProvider {
      * Class will be instantiated with no-arg constructor.
      * 
      * @param string $key the key
-     * @param string $parserClassName parser class name
+     * @param string $parser_class_name parser class name
      * @throws InvalidArgumentException if given class does not implement
      * <code>\LastNews\Parsers\IParser</code> interface
      */
-    public function setParserClass( $key, $parserClassName ) {
+    public function setParserClass( $key, $parser_class_name ) {
         
-        if( !in_array( 'IDDQDBY\\LastNews\\Parsers\\IParser', class_implements( $parserClassName )) ) {
+        if( !in_array( 'IDDQDBY\\LastNews\\Parsers\\IParser', class_implements( $parser_class_name )) ) {
             throw new InvalidArgumentException( 'Parser must implement \\IDDQDBY\\LastNews\\Parsers\\IParser interface' );
         }
         
-        $this->classes[ $key ] = $parserClassName;
+        $this->classes[ $key ] = $parser_class_name;
     }
     
     /**
@@ -81,11 +81,11 @@ class ParserProvider {
      * 
      * Class will be instantiated with no-arg constructor.
      * 
-     * @param array $parserClasses parser classes
+     * @param array $parser_classes parser classes
      */
-    public function setParserClasses( array $parserClasses ) {
-        foreach( $parserClasses as $key => $parserClassName ) {
-            $this->setParserClass( $key, $parserClassName );
+    public function setParserClasses( array $parser_classes ) {
+        foreach( $parser_classes as $key => $parser_class_name ) {
+            $this->setParserClass( $key, $parser_class_name );
         }
     }
     
