@@ -1,13 +1,17 @@
 <?php
 
-namespace IDDQDBY\LastNews\Parsers;
+namespace IDDQDBY\LastNews\Parsers\Result;
+
+use Exception;
+use InvalidArgumentException;
+use IDDQDBY\LastNews\Parsers\Result\Article;
 
 /**
  * Result of parsing.
  *
  * @author Sergey Protasevich
  */
-class ParserResult {
+class Excerpt {
     
     private $title;
     private $articles;
@@ -21,6 +25,18 @@ class ParserResult {
      * @param array $errors array of errors
      */
     public function __construct( $title, array $articles, array $errors = [] ) {
+        
+        foreach( $articles as $article ) {
+            if( !$article instanceof Article ) {
+                throw new InvalidArgumentException('Article is not an instance of Article class');
+            }
+        }
+        foreach( $errors as $error ) {
+            if( !$error instanceof Exception ) {
+                throw new InvalidArgumentException('Error is not an instance of Exception class');
+            }
+        }
+        
         $this->title = $title;
         $this->articles = $articles;
         $this->errors = $errors;

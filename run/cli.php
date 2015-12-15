@@ -4,25 +4,27 @@ require __DIR__.'/../vendor/autoload.php';
 require __DIR__.'/../autoload.php';
 
 use IDDQDBY\LastNews\LastNewsReader;
-use IDDQDBY\LastNews\Parsers\ParserResult;
+use IDDQDBY\LastNews\Parsers\Result\Excerpt;
 
 $resource = @$argv[1];
 $amount = (int)@$argv[2];
 $section = @$argv[3];
 
 $reader = new LastNewsReader();
-$reader->read( $resource, $section, $amount, function ( ParserResult $result ) {
+$reader->read( $resource, $section, $amount, function ( Excerpt $excerpt ) {
     
-    echo $result->getTitle();
+    echo $excerpt->getTitle();
     
-    foreach( $result->getArticles() as $article ) {
+    foreach( $excerpt->getArticles() as $article ) {
         echo "\n\n\n\n";
-        echo $article;
+        echo $article->getTitle();
+        echo "\n\n";
+        echo $article->getText();
     }
     
     echo "\n";
     
-    foreach( $result->getErrors() as $ex ) {
+    foreach( $excerpt->getErrors() as $ex ) {
         file_put_contents( 'php://stderr', "\n\n\n\n".$ex, FILE_APPEND );
     }
     

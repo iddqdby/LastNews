@@ -2,8 +2,12 @@
 
 namespace IDDQDBY\LastNews\Parsers;
 
+use IDDQDBY\LastNews\Parsers\Result\Article;
+
 /**
  * Parser for TUT.BY.
+ * 
+ * It parses SHORT BASIC information for each article, without details.
  *
  * @author Sergey Protasevich
  */
@@ -129,14 +133,14 @@ class TutBYParser extends AbstractHtmlParser {
                 ->get( $text_node_num );
 
         $title_string = $title
-                ? htmlqp( $title )->text()
+                ? trim( htmlqp( $title )->text() )
                 : '';
 
         $text_string = $text
-                ? htmlqp( $text )->text()
+                ? trim( htmlqp( $text )->text() )
                 : '';
         
-        return trim( $title_string )."\n\n".trim( $text_string );
+        return new Article( $title_string, $text_string, $article_info );
     }
 
 }

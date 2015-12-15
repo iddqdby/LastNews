@@ -4,6 +4,7 @@ namespace IDDQDBY\LastNews\Parsers;
 
 use Exception;
 use GuzzleHttp\Client;
+use IDDQDBY\LastNews\Parsers\Result\Excerpt;
 
 /**
  * Abstract HTML parser.
@@ -82,10 +83,10 @@ abstract class AbstractHtmlParser implements IParser {
             
             $resource_title = $this->getResourceTitle( $section );
             
-            return new ParserResult( $resource_title, $article_array, $errors_array );
+            return new Excerpt( $resource_title, $article_array, $errors_array );
             
         } catch( Exception $ex ) {
-            return new ParserResult( '', [], [ $ex ] );
+            return new Excerpt( '', [], [ $ex ] );
         }
     }
 
