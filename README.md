@@ -5,11 +5,22 @@ Parser of last news from different sources.
 
 Currently supported sources:
 * tut.by
+  * m *(default)*
   * finance
   * auto
   * sport
   * 42
   * lady
+* nn.by
+  * top *(default)*
+  * economy
+  * accidents
+  * style
+  * technologies
+  * culture
+  * sport
+  * auto
+  * love_and_sex
 
 ## How to set up
 
