@@ -90,11 +90,11 @@ For supported sources and sections see ["Description"](#Description).
 // Create the instance of reader
 $reader = new LastNewsReader();
 
-// Parse news and get result as an instance of \IDDQDBY\LastNews\Parsers\ParserResult class
+// Parse news and get result as an instance of IDDQDBY\LastNews\Parsers\Result\Excerpt class
 $result = $reader->read( $source, $section, $amount );
 
 // Parse news and process result with callback
-$reader->read( $source, $section, $amount, function ( ParserResult $result ) {
+$reader->read( $source, $section, $amount, function ( Excerpt $excerpt ) {
     // do something here
 } );
 ```
