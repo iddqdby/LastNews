@@ -18,8 +18,8 @@ class LastNewsReader {
         self::DEFAULT_RESOURCE  => '\\IDDQDBY\\LastNews\\Parsers\\NullParser',
         'tut.by'                => '\\IDDQDBY\\LastNews\\Parsers\\TutBYParser',
         'nn.by'                 => '\\IDDQDBY\\LastNews\\Parsers\\NashaNivaBYParser',
-//        'elementy.ru'           => '\\IDDQDBY\\LastNews\\Parsers\\ElementyRUParser',
-        // TODO Add another parsers here
+        'elementy.ru'           => '\\IDDQDBY\\LastNews\\Parsers\\ElementyRUParser',
+        // TODO Add parsers here
     ];
     
     private $parser_provider;

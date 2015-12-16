@@ -21,6 +21,7 @@ Currently supported sources:
   * sport
   * auto
   * love_and_sex
+* elementy.ru
 
 ## How to set up
 
