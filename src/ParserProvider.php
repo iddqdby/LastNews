@@ -3,6 +3,7 @@
 namespace IDDQDBY\LastNews;
 
 use InvalidArgumentException;
+use ReflectionClass;
 use IDDQDBY\LastNews\Parsers\IParser;
 
 /**
@@ -65,12 +66,23 @@ class ParserProvider {
      * @param string $key the key
      * @param string $parser_class_name parser class name
      * @throws InvalidArgumentException if given class does not implement
-     * <code>\LastNews\Parsers\IParser</code> interface
+     * <code>\IDDQDBY\LastNews\Parsers\IParser</code> interface
      */
     public function setParserClass( $key, $parser_class_name ) {
         
-        if( !in_array( 'IDDQDBY\\LastNews\\Parsers\\IParser', class_implements( $parser_class_name )) ) {
+        // check if class implements IParser interface
+        if( !in_array( 'IDDQDBY\\LastNews\\Parsers\\IParser', class_implements( $parser_class_name ) ) ) {
             throw new InvalidArgumentException( 'Parser must implement \\IDDQDBY\\LastNews\\Parsers\\IParser interface' );
+        }
+        
+        // check if class has valid constructor
+        $constructor = (new ReflectionClass( $parser_class_name ))->getConstructor();
+        if(
+                !is_null( $constructor )
+                &&
+                ( !$constructor->isPublic() || 0 != $constructor->getNumberOfRequiredParameters() )
+        ) {
+            throw new InvalidArgumentException( 'Parser must have public no-arg constructor' );
         }
         
         $this->classes[ $key ] = $parser_class_name;

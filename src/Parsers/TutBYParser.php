@@ -34,14 +34,7 @@ class TutBYParser extends AbstractHTMLParser {
      * {@inheritdoc}
      */
     public function getSections() {
-        return [
-            self::SECTION_DEFAULT,
-            self::SECTION_FINANCE,
-            self::SECTION_AUTO,
-            self::SECTION_SPORT,
-            self::SECTION_42,
-            self::SECTION_LADY,
-        ];
+        return array_keys( self::$sections_title );
     }
 
     protected function sectionExists( $section ) {

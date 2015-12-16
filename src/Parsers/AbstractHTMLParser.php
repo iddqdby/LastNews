@@ -4,6 +4,7 @@ namespace IDDQDBY\LastNews\Parsers;
 
 use Exception;
 use GuzzleHttp\Client;
+use IDDQDBY\LastNews\Parsers\Result\Article;
 use IDDQDBY\LastNews\Parsers\Result\Excerpt;
 
 /**
@@ -67,7 +68,7 @@ abstract class AbstractHTMLParser implements IParser {
                     $article_info_array[ $article_number++ ] = $article_info;
                 }
             } catch( Exception $ex ) {
-                $errors_array[ $article_number ] = $ex;
+                $errors_array[ $article_number++ ] = $ex;
             }
 
             foreach( $article_info_array as $article_number => $article_info ) {
@@ -167,7 +168,7 @@ abstract class AbstractHTMLParser implements IParser {
      * @param string $section the name of the section
      * @param string $section_uri relative URI of the section
      * @param int $amount amount of articles to parse
-     * @return Client the instance of client
+     * @return Client the instance of Client
      */
     protected function createHTTPClient(
             array $http_options, $base_uri, $section, $section_uri, $amount ) {
@@ -229,6 +230,7 @@ abstract class AbstractHTMLParser implements IParser {
      * @param string $section_html HTML of the section page
      * @param int $article_number number of the article
      * @return mixed information about given article
+     * @throws Exception if something goes wrong
      */
     protected abstract function parseArticleInfo(
             $base_uri, $section, $section_uri, $full_uri, $amount, $section_html, $article_number );
@@ -236,8 +238,8 @@ abstract class AbstractHTMLParser implements IParser {
     /**
      * Parse article.
      * 
-     * This method must return the text of the article. One can do additional
-     * HTTP requests with the instance of HTTP client if necessary.
+     * This method must return the article. One can do additional HTTP requests
+     * with the instance of HTTP client if necessary.
      * 
      * @param Client $http_client the instance of HTTP client
      * @param string $base_uri base URI of the resource
@@ -246,7 +248,8 @@ abstract class AbstractHTMLParser implements IParser {
      * @param string $full_uri full URI of the section
      * @param mixed $article_info information about given article returned by
      * the <code>parseArticleInfo()</code> method
-     * @return string the text of the article
+     * @return Article the article
+     * @throws Exception if something goes wrong
      */
     protected abstract function parseArticle(
             Client $http_client, $base_uri, $section, $section_uri, $full_uri, $article_info );

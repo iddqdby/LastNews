@@ -12,10 +12,7 @@ use IDDQDBY\LastNews\ParserProvider;
  */
 class LastNewsReader {
     
-    const DEFAULT_RESOURCE = '';
-    
     private static $built_in_parser_classes = [
-        self::DEFAULT_RESOURCE  => '\\IDDQDBY\\LastNews\\Parsers\\NullParser',
         'tut.by'                => '\\IDDQDBY\\LastNews\\Parsers\\TutBYParser',
         'nn.by'                 => '\\IDDQDBY\\LastNews\\Parsers\\NashaNivaBYParser',
         'elementy.ru'           => '\\IDDQDBY\\LastNews\\Parsers\\ElementyRUParser',
@@ -41,17 +38,14 @@ class LastNewsReader {
      * @param string $section the name of the section
      * @param int $amount maximum amount of news to read
      * @param callable $processor callback to process the result (optional);
-     * instance of <code>ParserResult</code>
-     * will be passed to the callback
-     * @return mixed the result; instance of <code>ParserResult</code> if
+     * instance of <code>Excerpt</code> will be passed to the callback
+     * @return mixed the result; instance of <code>Excerpt</code> if
      * <code>$processor</code> is not provided, or result of the
      * <code>$processor</code> callback
+     * @throws InvalidArgumentException if parser for given resourse is not
+     * registered
      */
     public function read( $resource, $section, $amount, callable $processor = null ) {
-        
-        if( !$this->parser_provider->isRegistered( $resource ) ) {
-            $resource = self::DEFAULT_RESOURCE;
-        }
         
         $parser = $this->parser_provider->getParser( $resource );
         $result = $parser->parse( $section, $amount );
